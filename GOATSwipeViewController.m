@@ -45,12 +45,14 @@
     [self loadGoats:^{
         // Goats have loaded
         dispatch_async(dispatch_get_main_queue(), ^{
-            UIView *firstView = [self swipeViewForGoat:self.goats[0]];
             // on the main thread
             // Update UI with 2 new goat views
+            UIView *firstView = [self viewForGoat:self.goats[0]];
             [self.view addSubview:firstView];
-            [self.view insertSubview:[self swipeViewForGoat:self.goats[1]] belowSubview:firstView];
+            UIView *secondView = [self viewForGoat:self.goats[1]];
+            [self.view insertSubview:secondView belowSubview:firstView];
             self.goatIndex = 2;
+
             // Update background label
             self.backgroundLabel.text = NSLocalizedString(@"Out of goats 😧", @"Out of goats message");
         });

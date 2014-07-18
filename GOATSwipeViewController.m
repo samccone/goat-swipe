@@ -1,6 +1,6 @@
 //
 //  GOATSwipeViewController.m
-//  
+//
 //
 //  Created by Sam Saccone on 7/17/14.
 //
@@ -11,108 +11,92 @@
 #import <MDCSwipeToChoose/MDCSwipeToChoose.h>
 #import <SDWebImage/UIImageView+WebCache.h>
 
-@interface GOATSwipeViewController ()
-@property (nonatomic, strong) UIImageView *goatView;
+@interface GOATSwipeViewController () <MDCSwipeToChooseDelegate>
 @property (nonatomic, strong) NSArray *goats;
+@property (nonatomic, assign) NSUInteger goatIndex;
+@property (nonatomic, strong) UILabel *backgroundLabel;
 @end
 
 @implementation GOATSwipeViewController
 
-- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        NSDictionary *keys = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"keys" ofType:@"plist"]];
-        
-        [[FlickrKit sharedFlickrKit] initializeWithAPIKey:keys[@"flickr_key"]  sharedSecret:keys[@"flickr_secret"]];
-    }
-    return self;
-}
+#pragma mark - View Lifecycle
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    [[self goatView] setFrame:self.view.bounds];
-    [[self goatView] setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth ];
-    [[self view] addSubview:[self goatView]];
-    
-    UITapGestureRecognizer *tapper = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(updateDisplayGoat)];
-    [self.goatView addGestureRecognizer:tapper];
-    [self.goatView setUserInteractionEnabled:YES];
-}
-
-- (UIImageView*) goatView
-{
-    if (_goatView == nil) {
-        _goatView = [UIImageView new];
-        _goatView.contentMode = UIViewContentModeScaleAspectFit;
-    }
-    
-    return _goatView;
-}
-
-- (void)updateDisplayGoat
-{
-    FlickrKit *fk = [FlickrKit sharedFlickrKit];
-    
-    NSDictionary *photo = self.goats[arc4random_uniform(self.goats.count)];
-    NSURL *url = [fk photoURLForSize:FKPhotoSizeLarge1024 fromPhotoDictionary:photo];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if ([self.goatView respondsToSelector:@selector(sd_setImageWithURL:)]) {
-            [self.goatView sd_setImageWithURL:url];
-        }
-    });
-}
-
-- (void)loadGoat:(void (^)())onGoatLoad
-{
-    if (self.goats != nil) {
-        [self updateDisplayGoat];
-        return;
-    }
-    
-    FlickrKit *fk = [FlickrKit sharedFlickrKit];
-    
-    FKFlickrPhotosSearch *goats = [FKFlickrPhotosSearch new];
-    
-    [goats setText:@"goats"];
-    
-    [fk call:goats completion:^(NSDictionary *response, NSError *error) {
-        NSArray *photoArray = ((NSDictionary *)response[@"photos"])[@"photo"];
-        
-        self.goats = photoArray;
-        if (onGoatLoad) {
-            onGoatLoad();
-        }
-    }];
+    self.backgroundLabel = [[UILabel alloc] initWithFrame:self.view.bounds];
+    self.backgroundLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.backgroundLabel.text = NSLocalizedString(@"Loading goats...", @"Loading goats message");
+    self.backgroundLabel.textAlignment = NSTextAlignmentCenter;
+    [self.view addSubview:self.backgroundLabel];
 }
 
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
-    [self loadGoat:^{
-        [self updateDisplayGoat];
+    [self loadGoats:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIView *firstView = [self swipeViewForGoat:self.goats[0]];
+            [self.view addSubview:firstView];
+            [self.view insertSubview:[self swipeViewForGoat:self.goats[1]] belowSubview:firstView];
+            self.goatIndex = 2;
+            self.backgroundLabel.text = NSLocalizedString(@"Out of goats 😧", @"Out of goats message");
+        });
     }];
 }
 
-- (void)didReceiveMemoryWarning
+#pragma mark - Goat Management
+
+- (void)loadGoats:(void (^)())onGoatLoad
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    FKFlickrPhotosSearch *goats = [FKFlickrPhotosSearch new];
+    [goats setText:@"goats"];
+    
+    [[FlickrKit sharedFlickrKit] call:goats
+                           completion:^(NSDictionary *response, NSError *error) {
+                               self.goats = ((NSDictionary *)response[@"photos"])[@"photo"];;
+                               if (onGoatLoad) {
+                                   onGoatLoad();
+                               }
+                           }];
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+- (MDCSwipeToChooseView *)swipeViewForGoat:(NSDictionary *)goat
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    MDCSwipeToChooseViewOptions *options = [MDCSwipeToChooseViewOptions new];
+    options.delegate = self;
+    options.likedText = @"Goat";
+    options.nopeText = @"No Goat";
+    
+    MDCSwipeToChooseView *swipeView = [[MDCSwipeToChooseView alloc] initWithFrame:self.view.bounds
+                                                                          options:options];
+    swipeView.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    
+    FlickrKit *fk = [FlickrKit sharedFlickrKit];
+    [swipeView.imageView sd_setImageWithURL:[fk photoURLForSize:FKPhotoSizeLarge1024 fromPhotoDictionary:goat]];
+    return swipeView;
 }
-*/
+
+- (NSDictionary *)nextGoat
+{
+    if (self.goatIndex >= self.goats.count) {
+        return nil;
+    }
+    NSDictionary *goat = self.goats[self.goatIndex];
+    self.goatIndex++;
+    return goat;
+}
+
+#pragma mark - MDCSwipeToChooseDelegate Callbacks
+
+- (void)view:(UIView *)view wasChosenWithDirection:(MDCSwipeDirection)direction {
+    [view removeFromSuperview];
+    NSDictionary *nextGoat = [self nextGoat];
+    if (nextGoat) {
+        MDCSwipeToChooseView *swipeView = [self swipeViewForGoat:nextGoat];
+        [self.view insertSubview:swipeView aboveSubview:self.backgroundLabel];
+    }
+}
 
 @end

@@ -9,10 +9,15 @@
 #import "GOATAppDelegate.h"
 #import "GOATSwipeViewController.h"
 
+#import <FlickrKit/FlickrKit.h>
+
 @implementation GOATAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    NSDictionary *keys = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"keys" ofType:@"plist"]];
+    [[FlickrKit sharedFlickrKit] initializeWithAPIKey:keys[@"flickr_key"]  sharedSecret:keys[@"flickr_secret"]];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];

@@ -45,24 +45,18 @@
     self.backgroundLabel.text = NSLocalizedString(@"Loading goats...", @"Loading goats message");
     self.backgroundLabel.textAlignment = NSTextAlignmentCenter;
     [self.view addSubview:self.backgroundLabel];
-}
 
-- (void) viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    
     // Trigger loading goats
     [self loadGoats:^{
         // Goats have loaded
         dispatch_async(dispatch_get_main_queue(), ^{
             // on the main thread
             // Update UI with 2 new goat views
-            UIView *firstView = [self viewForGoat:self.goats[0]];
+            UIView *firstView = [self viewForGoat:self.goats[self.goatIndex]];
             [self.view addSubview:firstView];
-            UIView *secondView = [self viewForGoat:self.goats[1]];
+            UIView *secondView = [self viewForGoat:self.goats[++self.goatIndex]];
             [self.view insertSubview:secondView belowSubview:firstView];
-            self.goatIndex = 2;
-
+            
             // Update background label
             self.backgroundLabel.text = NSLocalizedString(@"Out of goats 😧", @"Out of goats message");
         });
@@ -124,8 +118,7 @@
     if (self.goatIndex >= self.goats.count) {
         return nil;
     }
-    NSDictionary *goat = self.goats[self.goatIndex];
-    self.goatIndex++;
+    NSDictionary *goat = self.goats[++self.goatIndex];
     return goat;
 }
 
@@ -144,7 +137,7 @@
 
 - (void)shareGoat {
     
-    NSDictionary *activeGoat = self.goats[self.goatIndex -1];
+    NSDictionary *activeGoat = self.goats[self.goatIndex - 1];
 
     FlickrKit *fk = [FlickrKit sharedFlickrKit];
     NSURL *activeGoatUrl = [fk photoURLForSize:FKPhotoSizeLarge1024 fromPhotoDictionary:activeGoat];

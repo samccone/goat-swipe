@@ -128,7 +128,7 @@
     [view removeFromSuperview];
     NSDictionary *nextGoat = [self nextGoat];
     if (nextGoat) {
-        MDCSwipeToChooseView *swipeView = [self viewForGoat:nextGoat];
+        UIView *swipeView = [self viewForGoat:nextGoat];
         [self.view insertSubview:swipeView aboveSubview:self.backgroundLabel];
     }
 }

@@ -30,6 +30,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     self.backgroundLabel = [[UILabel alloc] initWithFrame:self.view.bounds];
     self.backgroundLabel.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     self.backgroundLabel.text = NSLocalizedString(@"Loading goats...", @"Loading goats message");
@@ -102,6 +103,10 @@
     
     FlickrKit *fk = [FlickrKit sharedFlickrKit];
     [swipeView.imageView sd_setImageWithURL:[fk photoURLForSize:FKPhotoSizeLarge1024 fromPhotoDictionary:goat]];
+    
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(shareGoat)];
+    [swipeView addGestureRecognizer:longPress];
+    
     return swipeView;
 }
 
@@ -121,9 +126,24 @@
     [view removeFromSuperview];
     NSDictionary *nextGoat = [self nextGoat];
     if (nextGoat) {
-        MDCSwipeToChooseView *swipeView = [self swipeViewForGoat:nextGoat];
+        MDCSwipeToChooseView *swipeView = [self viewForGoat:nextGoat];
         [self.view insertSubview:swipeView aboveSubview:self.backgroundLabel];
     }
+}
+
+#pragma mark - Share
+
+- (void)shareGoat {
+    
+    NSDictionary *activeGoat = self.goats[self.goatIndex -1];
+
+    FlickrKit *fk = [FlickrKit sharedFlickrKit];
+    NSURL *activeGoatUrl = [fk photoURLForSize:FKPhotoSizeLarge1024 fromPhotoDictionary:activeGoat];
+
+    
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:@[activeGoatUrl] applicationActivities:nil];
+
+    [self presentViewController:activityController animated:YES completion:nil];
 }
 
 @end

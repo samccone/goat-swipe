@@ -14,6 +14,12 @@
 @interface GOATSwipeViewController () <MDCSwipeToChooseDelegate>
 @property (nonatomic, strong) NSArray *goats;
 @property (nonatomic, assign) NSUInteger goatIndex;
+/** Label that sits under the goat views.
+
+ Since it's visible when there are no goats, it's used for
+ displaying a loading message as well as an "out of goat"
+ message.
+ */
 @property (nonatomic, strong) UILabel *backgroundLabel;
 @end
 
@@ -35,12 +41,17 @@
 {
     [super viewWillAppear:animated];
     
+    // Trigger loading goats
     [self loadGoats:^{
+        // Goats have loaded
         dispatch_async(dispatch_get_main_queue(), ^{
             UIView *firstView = [self swipeViewForGoat:self.goats[0]];
+            // on the main thread
+            // Update UI with 2 new goat views
             [self.view addSubview:firstView];
             [self.view insertSubview:[self swipeViewForGoat:self.goats[1]] belowSubview:firstView];
             self.goatIndex = 2;
+            // Update background label
             self.backgroundLabel.text = NSLocalizedString(@"Out of goats 😧", @"Out of goats message");
         });
     }];
@@ -48,6 +59,12 @@
 
 #pragma mark - Goat Management
 
+/**
+ Fetches a collection of goat Flickr image description dictionaries
+ and saves them to the `goats` property on the view controller.
+
+ @param onGoatLoad Called asynchronously when the goats have been loaded.
+ */
 - (void)loadGoats:(void (^)())onGoatLoad
 {
     FKFlickrPhotosSearch *goats = [FKFlickrPhotosSearch new];
@@ -62,7 +79,12 @@
                            }];
 }
 
-- (MDCSwipeToChooseView *)swipeViewForGoat:(NSDictionary *)goat
+/**
+ Creates a new UIView for a given goat
+
+ @param goat An image description dictionary from the Flickr API
+ */
+- (UIView *)viewForGoat:(NSDictionary *)goat
 {
     MDCSwipeToChooseViewOptions *options = [MDCSwipeToChooseViewOptions new];
     options.delegate = self;

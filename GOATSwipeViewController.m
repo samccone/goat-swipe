@@ -27,6 +27,15 @@
 
 #pragma mark - View Lifecycle
 
+- (instancetype)init
+{
+    self = [super init];
+    
+    _goatIndex = 0;
+    
+    return self;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];

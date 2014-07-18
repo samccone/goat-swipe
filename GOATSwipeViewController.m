@@ -71,7 +71,10 @@
     
     MDCSwipeToChooseView *swipeView = [[MDCSwipeToChooseView alloc] initWithFrame:self.view.bounds
                                                                           options:options];
-    swipeView.imageView.contentMode = UIViewContentModeScaleAspectFill;
+    swipeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    swipeView.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    swipeView.backgroundColor = [UIColor whiteColor];
+    swipeView.imageView.contentMode = UIViewContentModeScaleAspectFit;
     
     FlickrKit *fk = [FlickrKit sharedFlickrKit];
     [swipeView.imageView sd_setImageWithURL:[fk photoURLForSize:FKPhotoSizeLarge1024 fromPhotoDictionary:goat]];

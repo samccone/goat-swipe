@@ -1,3 +1,5 @@
-For this to work you need to add a keys.plist
+## Getting Started
 
-![](http://dl.dropbox.com/u/36928599/Screenshots/0f4.png)
+* pod install
+* add a keys.plist
+  * ![](http://dl.dropbox.com/u/36928599/Screenshots/0f4.png)

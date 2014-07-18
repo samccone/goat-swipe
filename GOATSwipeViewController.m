@@ -71,6 +71,8 @@
     
     MDCSwipeToChooseView *swipeView = [[MDCSwipeToChooseView alloc] initWithFrame:self.view.bounds
                                                                           options:options];
+    swipeView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    swipeView.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     swipeView.backgroundColor = [UIColor whiteColor];
     swipeView.imageView.contentMode = UIViewContentModeScaleAspectFit;
     

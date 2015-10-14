@@ -2,7 +2,7 @@ PODS:
   - FlickrKit (1.0.3)
   - MDCSwipeToChoose (0.2.1)
   - SDWebImage (3.7.0):
-    - SDWebImage/Core
+    - SDWebImage/Core (= 3.7.0)
   - SDWebImage/Core (3.7.0)
 
 DEPENDENCIES:
@@ -11,8 +11,8 @@ DEPENDENCIES:
   - SDWebImage
 
 SPEC CHECKSUMS:
-  FlickrKit: 884ea0173b3f8a1f56fd418f2ae635a03a852294
-  MDCSwipeToChoose: 54f7b1675eff182cdc46c582360c7fca4c766a67
-  SDWebImage: 791cb0f588046cb0bb7802ae8ae8f5462947b773
+  FlickrKit: 241b47e21e32f8d2a4f7d8612580afb4c2bbaf48
+  MDCSwipeToChoose: af5b0c5caefbd88e3b525fc479e4f35c886699ab
+  SDWebImage: b42db92951f9d565c55f1d7f1d5efe47e33a7515
 
-COCOAPODS: 0.33.1
+COCOAPODS: 0.39.0
